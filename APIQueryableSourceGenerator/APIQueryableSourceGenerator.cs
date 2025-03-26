@@ -105,7 +105,9 @@ public class IncrementalGenerator: IIncrementalGenerator {
                     var queryProps = clsSymbol.GetMembers()
                         .OfType<IPropertySymbol>()
                         .Where( _ => _.DeclaredAccessibility == Accessibility.Public
-                            && !_.Name.StartsWith("Client"))
+                            && !_.GetAttributes().Any( a => a.AttributeClass?.Name == "TenantKeyAttribute" )
+                            && !_.GetAttributes().Any( a => a.AttributeClass?.Name == "JsonIgnoreAttribute" )
+                            )
                         .Select( p => {
                             var (propType, isNullableValueType) = p.Type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T
                                 ? (((INamedTypeSymbol)p.Type).TypeArguments[0], true)
@@ -319,7 +321,6 @@ public partial class QueryEntity_{ClsName}: QueryEntityDefaultHandlerAndConfig<Q
 
             StringBuilder ts = new();
             ts.AppendLine( $$"""
-            import type { Id } from '../id.d.ts';
             import type { {{cls.Name}} } from './{{cls.Name}}.d.ts';
             """ );
             HashSet<string> imports = new() { cls.Name };
