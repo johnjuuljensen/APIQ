@@ -216,6 +216,7 @@ public partial class QueryEntity_{ClsName}: QueryEntityDefaultHandlerAndConfig<Q
                 "INT" or "UINT" or "FLOAT" or "DOUBLE" or "LONG" or "ULONG" => "number",
                 "INSTANT" or "DATETIME" or "DATETIMEOFFSET" => "Date",
                 "BOOL" => "boolean",
+                "STRING" or "TIMEONLY" => "string",
                 _ => t
             };
 
