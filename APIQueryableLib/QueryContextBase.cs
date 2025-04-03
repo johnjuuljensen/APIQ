@@ -12,6 +12,7 @@ public abstract class QueryContextBase<TResult>: IQueryContext<TResult> {
         where TInclude : class {
         public TConditions? Where { get; set; }
         public TInclude? Include { get; set; }
+        public int? Limit { get; set; }
     }
 
     protected abstract Request<TConditions, TInclude>? ParseQuery<TEntity, TConditions, TInclude>()
@@ -24,6 +25,8 @@ public abstract class QueryContextBase<TResult>: IQueryContext<TResult> {
 
     public delegate IQueryable<TEntity> DGetQueryable<TEntity>( Expression<Func<TEntity, object?>>[] withExprs ) where TEntity : class;
     protected abstract IQueryable<TEntity> GetQueryable<TEntity>( params Expression<Func<TEntity, object?>>[] withExprs ) where TEntity : class;
+
+    protected abstract int DefaultLimit { get; }
 
     public TResult ExecuteQuery<TEntity, TConditions, TInclude>( DGetQueryable<TEntity> getQueryable )
         where TEntity : class
@@ -44,6 +47,8 @@ public abstract class QueryContextBase<TResult>: IQueryContext<TResult> {
         foreach ( var condExpr in req.Where?.GetExpressions() ?? [] ) {
             entities = entities.Where( condExpr );
         }
+
+        entities = entities.Take( req.Limit ?? DefaultLimit );
 
         return MapResult( entities );
     }
