@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace APIQueryable;
@@ -14,16 +16,16 @@ public static class HandlerStore {
             T.ExecuteQuery<TResult>( queryContext );
     }
 
-    static readonly Dictionary<string, IQueryExecutor> ms_APIQueryableHandlers = new();
+    static readonly Dictionary<string, IQueryExecutor> ms_APIQueryableHandlers = new( StringComparer.InvariantCultureIgnoreCase );
 
     public static bool RegisterAPIQueryable<T>(string? nameOverload = null) where T : class, IIsAPIQueryable<T> {
-        return ms_APIQueryableHandlers.TryAdd( nameOverload ?? typeof( T ).Name.ToUpperInvariant(), new QueryExecutor<T>() );
+        return ms_APIQueryableHandlers.TryAdd( nameOverload ?? typeof( T ).Name, new QueryExecutor<T>() );
     }
 
     public delegate TResult DMapNoHandler<TResult>();
 
     public static TResult InvokeAPIQHandler<TResult>( string entityName, IQueryContext<TResult> queryContext, DMapNoHandler<TResult> mapNoHandler ) =>
-        ms_APIQueryableHandlers.TryGetValue( entityName.ToUpperInvariant(), out var handler )
+        ms_APIQueryableHandlers.TryGetValue( entityName, out var handler )
         ? handler.Run( queryContext )
         : mapNoHandler();
 
