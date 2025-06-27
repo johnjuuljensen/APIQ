@@ -6,14 +6,17 @@ using System.Linq;
 namespace APIQueryable;
 
 public static class HandlerStore {
-    interface IQueryExecutor {
+    public interface IQueryExecutor {
         TResult Run<TResult>( IQueryContext<TResult> queryContext );
+        Type EntityType { get; }
     }
 
     class QueryExecutor<T>: IQueryExecutor
         where T : class, IIsAPIQueryable<T> {
         public TResult Run<TResult>( IQueryContext<TResult> queryContext ) =>
             T.ExecuteQuery<TResult>( queryContext );
+
+        public Type EntityType => typeof( T );
     }
 
     static readonly Dictionary<string, IQueryExecutor> ms_APIQueryableHandlers = new( StringComparer.InvariantCultureIgnoreCase );
@@ -29,7 +32,9 @@ public static class HandlerStore {
         ? handler.Run( queryContext )
         : mapNoHandler();
 
-    public static IEnumerable<(string EntityName, TResult Result)> Select<TResult>( IQueryContext<TResult> queryContext ) =>
-        ms_APIQueryableHandlers.OrderBy( kv => kv.Key ).Select( kv => (kv.Key, kv.Value.Run( queryContext )));
+    //public static IEnumerable<(string EntityName, TResult Result)> Select<TResult>( IQueryContext<TResult> queryContext ) =>
+    //    ms_APIQueryableHandlers.OrderBy( kv => kv.Key ).Select( kv => (kv.Key, kv.Value.Run( queryContext )));
+
+    public static IEnumerable<KeyValuePair<string, IQueryExecutor>> Handlers => ms_APIQueryableHandlers;
 }
 
