@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace APIQueryable;
 
@@ -21,7 +19,7 @@ public static class HandlerStore {
 
     static readonly Dictionary<string, IQueryExecutor> ms_APIQueryableHandlers = new( StringComparer.InvariantCultureIgnoreCase );
 
-    public static bool RegisterAPIQueryable<T>(string? nameOverload = null) where T : class, IIsAPIQueryable<T> {
+    public static bool RegisterAPIQueryable<T>( string? nameOverload = null ) where T : class, IIsAPIQueryable<T> {
         return ms_APIQueryableHandlers.TryAdd( nameOverload ?? typeof( T ).Name, new QueryExecutor<T>() );
     }
 

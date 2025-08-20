@@ -1,12 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace APIQueryable;
 
-public class APIQueryableAttribute : Attribute
-{
+public class APIQueryableAttribute: Attribute {
     public bool SkipRegistration { get; set; }
     public bool Exclude { get; set; }
 }

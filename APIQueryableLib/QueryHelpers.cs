@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -78,28 +77,26 @@ public static class QueryHelpers {
 
 
 
-    class ReplaceParameterVisitor( ParameterExpression newParameter ) : ExpressionVisitor {
-        protected override Expression VisitParameter(ParameterExpression node) {
+    class ReplaceParameterVisitor( ParameterExpression newParameter ): ExpressionVisitor {
+        protected override Expression VisitParameter( ParameterExpression node ) {
             return newParameter;
         }
     }
 
-    delegate Expression BooleanOp(Expression left, Expression right);
+    delegate Expression BooleanOp( Expression left, Expression right );
 
-    static Expression<Func<T, bool>> BooleanMerge<T>(IEnumerable<Expression<Func<T, bool>>> es, BooleanOp op)
-    {
+    static Expression<Func<T, bool>> BooleanMerge<T>( IEnumerable<Expression<Func<T, bool>>> es, BooleanOp op ) {
         var first = es.First();
         var parameter = first.Parameters[0];
-        var visitor = new ReplaceParameterVisitor(parameter);
+        var visitor = new ReplaceParameterVisitor( parameter );
 
         Expression res = first.Body;
-        foreach (var e in es.Skip(1))
-        {
-            var replacedExpr = (Expression<Func<T, bool>>)visitor.Visit(e);
-            res = op(res, replacedExpr.Body);
+        foreach ( var e in es.Skip( 1 ) ) {
+            var replacedExpr = (Expression<Func<T, bool>>)visitor.Visit( e );
+            res = op( res, replacedExpr.Body );
         }
 
-        return Expression.Lambda<Func<T, bool>>(res, parameter);
+        return Expression.Lambda<Func<T, bool>>( res, parameter );
     }
 
 

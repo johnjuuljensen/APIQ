@@ -21,15 +21,15 @@ record GlobalConfig(
     const string OPTIONS_PREFIX = nameof( APIQueryableSourceGenerator );
     public static GlobalConfig Load( AnalyzerConfigOptions opt ) =>
         new GlobalConfig(
-            //UpdatableInterface: opt.GetStringOrDefault( OPTIONS_PREFIX, nameof( UpdatableInterface ) ) ?? "IUpdatable",
-            //UpdatableInterfaceCloneMethod: opt.GetStringOrDefault( OPTIONS_PREFIX, nameof( UpdatableInterfaceCloneMethod ) ) ?? "CloneForUpdate",
-            //UsingNamespaces: (opt.GetStringOrDefault( OPTIONS_PREFIX, nameof( UsingNamespaces ) )
-            //    ?.Split( new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries ) ?? [])
-            //    .Select( _ => _.Trim() )
-            //    .Where( _ => !string.IsNullOrWhiteSpace( _ ) )
-            //    .ToImmutableArray(),
-            //ChangeTrackerType: opt.GetStringOrDefault( OPTIONS_PREFIX, nameof( ChangeTrackerType ) ) ?? "ChangeTracker",
-            //ChangeTrackerSetPropertyMethod: opt.GetStringOrDefault( OPTIONS_PREFIX, nameof( ChangeTrackerSetPropertyMethod ) ) ?? "SetProperty"
+        //UpdatableInterface: opt.GetStringOrDefault( OPTIONS_PREFIX, nameof( UpdatableInterface ) ) ?? "IUpdatable",
+        //UpdatableInterfaceCloneMethod: opt.GetStringOrDefault( OPTIONS_PREFIX, nameof( UpdatableInterfaceCloneMethod ) ) ?? "CloneForUpdate",
+        //UsingNamespaces: (opt.GetStringOrDefault( OPTIONS_PREFIX, nameof( UsingNamespaces ) )
+        //    ?.Split( new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries ) ?? [])
+        //    .Select( _ => _.Trim() )
+        //    .Where( _ => !string.IsNullOrWhiteSpace( _ ) )
+        //    .ToImmutableArray(),
+        //ChangeTrackerType: opt.GetStringOrDefault( OPTIONS_PREFIX, nameof( ChangeTrackerType ) ) ?? "ChangeTracker",
+        //ChangeTrackerSetPropertyMethod: opt.GetStringOrDefault( OPTIONS_PREFIX, nameof( ChangeTrackerSetPropertyMethod ) ) ?? "SetProperty"
         );
 
     public static GlobalConfig Load( AnalyzerConfigOptionsProvider optProv, CancellationToken _ ) =>
@@ -118,7 +118,7 @@ public class IncrementalGenerator: IIncrementalGenerator {
                                 IsValueType: propType.IsValueType,
                                 SpecialType: (propType.IsEnum() || propType.IsNullableEnumType()) ? SpecialType.System_Enum : propType.SpecialType,
                                 //Type: propType.ToDisplayString( SymbolDisplayFormat.MinimallyQualifiedFormat ),
-                                TypeWithoutNullable: propType.WithNullableAnnotation( NullableAnnotation.NotAnnotated ).ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
+                                TypeWithoutNullable: propType.WithNullableAnnotation( NullableAnnotation.NotAnnotated ).ToDisplayString( SymbolDisplayFormat.MinimallyQualifiedFormat ),
                                 TypeIsNullable: p.NullableAnnotation == NullableAnnotation.Annotated || isNullableValueType,
                                 IsVirtual: p.IsVirtual
                             );
@@ -234,13 +234,13 @@ public partial class QueryEntity_{ClsName}: QueryEntityDefaultHandlerAndConfig<Q
             if ( prop.IsValueType
                 && prop.SpecialType != SpecialType.System_Boolean
                 && prop.SpecialType != SpecialType.System_Enum
-                && !prop.Name.EndsWith("Id")
-                //&& !propType.IsGenericType
-                //&& !SymbolEqualityComparer.Default.Equals( propType, IdT )
-                //&& propType.AllInterfaces.Contains( ComparableT.Construct( propType ), SymbolEqualityComparer.Default ) 
+                && !prop.Name.EndsWith( "Id" )
+            //&& !propType.IsGenericType
+            //&& !SymbolEqualityComparer.Default.Equals( propType, IdT )
+            //&& propType.AllInterfaces.Contains( ComparableT.Construct( propType ), SymbolEqualityComparer.Default ) 
             ) {
                 foreach ( var kv in Query_ValueTypeConditions ) {
-                    tsConditionProps.AppendLine( $"{propIndent}readonly {prop.Name}{kv.Key}?: {TsType(prop.TypeWithoutNullable)}; // {prop.SpecialType}" );
+                    tsConditionProps.AppendLine( $"{propIndent}readonly {prop.Name}{kv.Key}?: {TsType( prop.TypeWithoutNullable )}; // {prop.SpecialType}" );
                     conditionProps.AppendLine( $"{propIndent}public {prop.TypeWithoutNullable}? {prop.Name}{kv.Key} {{ get; init; }}" );
                     conditionExprs.AppendLine( $"{exprIndent}if ( {prop.Name}{kv.Key}.HasValue ) yield return _ => _.{prop.Name} {kv.Value} {prop.Name}{kv.Key};" );
                 }
@@ -260,12 +260,12 @@ public partial class QueryEntity_{ClsName}: QueryEntityDefaultHandlerAndConfig<Q
             }
 
             if ( hasIn ) {
-                tsConditionProps.AppendLine( $"{propIndent}readonly {prop.Name}In?: ReadonlyArray<{TsType(prop.TypeWithoutNullable)}>;" );
+                tsConditionProps.AppendLine( $"{propIndent}readonly {prop.Name}In?: ReadonlyArray<{TsType( prop.TypeWithoutNullable )}>;" );
                 conditionProps.AppendLine( $"{propIndent}public IReadOnlyCollection<{prop.TypeWithoutNullable}>? {prop.Name}In {{ get; init; }}" );
                 conditionExprs.AppendLine( $"{exprIndent}if ( {prop.Name}In?.Count > 0 ) yield return _ => {prop.Name}In.Contains( _.{prop.Name}{(prop.IsValueType && prop.TypeIsNullable ? "!.Value" : "")} );" );
             }
 
-            if ((prop.IsValueType || prop.SpecialType == SpecialType.System_String) && prop.TypeIsNullable) {
+            if ( (prop.IsValueType || prop.SpecialType == SpecialType.System_String) && prop.TypeIsNullable ) {
                 tsConditionProps.AppendLine( $"{propIndent}readonly {prop.Name}IsNull?: boolean;" );
                 conditionProps.AppendLine( $"{propIndent}public bool? {prop.Name}IsNull {{ get; init; }}" );
                 conditionExprs.AppendLine( $"{exprIndent}if ( {prop.Name}IsNull.HasValue ) yield return _ => (_.{prop.Name} == null) == {prop.Name}IsNull;" );
