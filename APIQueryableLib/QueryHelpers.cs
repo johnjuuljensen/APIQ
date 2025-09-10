@@ -14,6 +14,7 @@ public static class QueryHelpers {
         where TConditions : IQueryCondition<T, TConditions> {
         var exprs = conds
             .GetLocalConditionExpressions()
+            .Concat( conds.GetCustomConditionExpressions())
             .Concat( conds.GetAssociationConditionExpressions().SelectMany( _ => _ ) );
 
         if ( conds.Or?.Any() ?? false ) {

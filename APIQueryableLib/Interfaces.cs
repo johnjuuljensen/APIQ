@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace APIQueryable;
@@ -20,6 +21,8 @@ public interface IQueryCondition<T, TConditions> where TConditions : IQueryCondi
     IEnumerable<IEnumerable<Expression<Func<T, bool>>>> GetAssociationConditionExpressions();
 
     IEnumerable<TConditions>? Or { get; }
+
+    IEnumerable<Expression<Func<T, bool>>> GetCustomConditionExpressions() => Enumerable.Empty<Expression<Func<T, bool>>>();
 }
 
 
