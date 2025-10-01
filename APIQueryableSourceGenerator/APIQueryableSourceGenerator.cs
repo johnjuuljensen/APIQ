@@ -107,6 +107,7 @@ public class IncrementalGenerator: IIncrementalGenerator {
                         .Where( _ => _.DeclaredAccessibility == Accessibility.Public
                             && !_.GetAttributes().Any( a => a.AttributeClass?.Name == "TenantKeyAttribute" )
                             && !_.GetAttributes().Any( a => a.AttributeClass?.Name == "JsonIgnoreAttribute" )
+                            &&  _.SetMethod != null
                             )
                         .Select( p => {
                             var (propType, isNullableValueType) = p.Type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T
