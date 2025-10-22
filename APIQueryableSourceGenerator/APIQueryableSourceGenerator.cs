@@ -105,6 +105,7 @@ public class IncrementalGenerator: IIncrementalGenerator {
                     var queryProps = clsSymbol.GetMembers()
                         .OfType<IPropertySymbol>()
                         .Where( _ => _.DeclaredAccessibility == Accessibility.Public
+                            && !_.IsStatic
                             && !_.GetAttributes().Any( a => a.AttributeClass?.Name == "TenantKeyAttribute" )
                             && !_.GetAttributes().Any( a => a.AttributeClass?.Name == "JsonIgnoreAttribute" )
                             &&  _.SetMethod != null
