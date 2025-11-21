@@ -72,7 +72,8 @@ record Property(
     //string Type,
     string TypeWithoutNullable,
     bool TypeIsNullable,
-    bool IsVirtual
+    bool IsVirtual,
+    int? PrimaryKeyOrder
     );
 
 record APIQClassConfig(
@@ -91,6 +92,16 @@ public class IncrementalGenerator: IIncrementalGenerator {
         && cls.Modifiers.Any( m => m.IsKind( SyntaxKind.PartialKeyword ) )
         && !cls.Modifiers.Any( m => m.IsKind( SyntaxKind.StaticKeyword ) );
 
+    static int? GetPrimaryKeyOrder( IPropertySymbol p ) {
+        var attr = p.GetAttributes().SingleOrDefault( a => a.AttributeClass?.Name == "PrimaryKeyAttribute" );
+        if ( attr is null ) return null;
+
+        if ( attr.ConstructorArguments.Length == 1 ) {
+            return (int)attr.ConstructorArguments[0].Value!;
+        }
+
+        return 0;
+    }
 
     public void Initialize( IncrementalGeneratorInitializationContext initContext ) {
         var configProv = initContext.AnalyzerConfigOptionsProvider.Select( GlobalConfig.Load );
@@ -122,9 +133,12 @@ public class IncrementalGenerator: IIncrementalGenerator {
                                 //Type: propType.ToDisplayString( SymbolDisplayFormat.MinimallyQualifiedFormat ),
                                 TypeWithoutNullable: propType.WithNullableAnnotation( NullableAnnotation.NotAnnotated ).ToDisplayString( SymbolDisplayFormat.MinimallyQualifiedFormat ),
                                 TypeIsNullable: p.NullableAnnotation == NullableAnnotation.Annotated || isNullableValueType,
-                                IsVirtual: p.IsVirtual
+                                IsVirtual: p.IsVirtual,
+                                PrimaryKeyOrder: GetPrimaryKeyOrder( p )
                             );
                         } )
+                        .OrderBy( _ => _.PrimaryKeyOrder ?? 99 )
+                        .ThenBy( _ => _.Name )
                         .ToImmutableArray();
 
 
