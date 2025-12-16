@@ -374,16 +374,30 @@ public partial class QueryEntity_{ClsName}: QueryEntityDefaultHandlerAndConfig<Q
 
             """ );
 
-            Directory.CreateDirectory( Path.GetDirectoryName( cls.TypescriptPath ) );
-
-            using var fs = new FileStream( cls.TypescriptPath, FileMode.Create, FileAccess.Write );
-            using var s = new StreamWriter( fs, Encoding.UTF8 );
-            s.Write( ts );
-
-            s.Close();
-            fs.Close();
+            WriteTypeScriptIfDifferent( cls.TypescriptPath, ts.ToString() );
         }
 #pragma warning restore RS1035
 
     }
+
+#pragma warning disable RS1035
+    private static void WriteTypeScriptIfDifferent( string filePath, string content ) {
+        Directory.CreateDirectory( Path.GetDirectoryName( filePath ) );
+
+        static string NormalizeLineEndings( string text ) => text.Replace( "\r\n", "\n" ).Replace( "\r", "\n" );
+
+        var normalizedContent = NormalizeLineEndings( content );
+
+        if ( File.Exists( filePath ) ) {
+            var existingContent = File.ReadAllText( filePath, Encoding.UTF8 );
+            var normalizedExisting = NormalizeLineEndings( existingContent );
+
+            if ( normalizedContent == normalizedExisting ) {
+                return;
+            }
+        }
+
+        File.WriteAllText( filePath, content, Encoding.UTF8 );
+    }
+#pragma warning restore RS1035
 }
