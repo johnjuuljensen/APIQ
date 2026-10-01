@@ -229,7 +229,7 @@ public partial class QueryEntity_{ClsName}: QueryEntityDefaultHandlerAndConfig<Q
 
         static string TsType( in string t ) =>
             t.ToUpperInvariant() switch {
-                "INT" or "UINT" or "FLOAT" or "DOUBLE" or "LONG" or "ULONG" => "number",
+                "INT" or "UINT" or "FLOAT" or "DOUBLE" or "DECIMAL" or "LONG" or "ULONG" => "number",
                 "INSTANT" or "DATETIME" or "DATETIMEOFFSET" => "Date",
                 "BOOL" => "boolean",
                 "STRING" or "TIMEONLY" or "TIMESPAN" => "string",
