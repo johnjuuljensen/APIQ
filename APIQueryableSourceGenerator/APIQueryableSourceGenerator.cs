@@ -73,7 +73,8 @@ record Property(
     string TypeWithoutNullable,
     bool TypeIsNullable,
     bool IsVirtual,
-    int? PrimaryKeyOrder
+    int? PrimaryKeyOrder,
+    bool IsJson
     );
 
 record APIQClassConfig(
@@ -134,7 +135,8 @@ public class IncrementalGenerator: IIncrementalGenerator {
                                 TypeWithoutNullable: propType.WithNullableAnnotation( NullableAnnotation.NotAnnotated ).ToDisplayString( SymbolDisplayFormat.MinimallyQualifiedFormat ),
                                 TypeIsNullable: p.NullableAnnotation == NullableAnnotation.Annotated || isNullableValueType,
                                 IsVirtual: p.IsVirtual,
-                                PrimaryKeyOrder: GetPrimaryKeyOrder( p )
+                                PrimaryKeyOrder: GetPrimaryKeyOrder( p ),
+                                IsJson: propType.ToDisplayString() == "System.Text.Json.JsonElement"
                             );
                         } )
                         .OrderBy( _ => _.PrimaryKeyOrder ?? 99 )
@@ -241,6 +243,9 @@ public partial class QueryEntity_{ClsName}: QueryEntityDefaultHandlerAndConfig<Q
         StringBuilder conditionProps = new();
         StringBuilder conditionExprs = new();
         foreach ( var prop in dataProps ) {
+            // A json document has no ordering, and matching a whole document is not a useful filter.
+            if ( prop.IsJson ) continue;
+
             bool hasIn = true;
 
             if ( prop.SpecialType == SpecialType.System_DateTime ) {
